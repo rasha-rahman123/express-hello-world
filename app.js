@@ -9,9 +9,6 @@ const port = process.env.PORT || 3001;
 
 var folder = './public/';
    
-app.get("/", (req, res) => res.type('html').send(html));
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.get('/sc', (req,res) => {
   const { url } = req.query
@@ -53,6 +50,25 @@ fs.readdir(folder, (err, files) => {
   )
    })
 })
+app.get("/:dada", (req, res) => {
+  const fileName = req.params.dada;
+  const filePath = folder + fileName;
+  fs.readFile(filePath, function (err, data) {
+    if (err) {
+      res.writeHead(404, { 'Content-Type': 'text/html' });
+      return res.end("404 Not Found");
+    }
+    res.writeHead(200, { 'Content-Type': 'file/mp3',
+    'Content-Disposition': 'attachment; filename=' + fileName });
+    res.write(data);
+    return res.end();
+  })
+});
+
+
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
 
 const html = `
 <!DOCTYPE html>
