@@ -1,11 +1,58 @@
 const express = require("express");
+const scdl = require('soundcloud-downloader').default
+const fs = require('fs')
+
+const randomFileName = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+const CLIENT_ID = 'ZzQw5OLejAQys1cYAUI2nUbLtZbBe5Lg'
 const app = express();
 const port = process.env.PORT || 3001;
 
+var folder = './public/';
+   
 app.get("/", (req, res) => res.type('html').send(html));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
+app.get('/sc', (req,res) => {
+  const { url } = req.query
+  res.type('json')
+  const fileName = randomFileName() + '.mp3'
+
+
+fs.readdir(folder, (err, files) => {
+  if (err) throw err;
+  
+  for (const file of files) {
+      console.log(file + ' : File Deleted Successfully.');
+      fs.unlinkSync(folder+file);
+  }
+  
+});
+
+  const writeStream = fs.createWriteStream(`./public/${fileName}`)
+
+  
+  scdl.download(url, CLIENT_ID).then(downloadedStream => downloadedStream.pipe(writeStream)).then(() => {
+    writeStream.on('finish', () => {
+      
+      fs.readFile(`./public/${fileName}`, (err,data) => {
+        if (err) {
+          res.status(500).send(err)
+          fs.unlink(`./public/${fileName}`, () => {})
+    
+  
+        } else {
+       res.status(200).json({
+          url: `https://demoback.b-cdn.net/${fileName}`
+       })
+  
+        }
+        
+      })
+    }
+  )
+   })
+})
 
 const html = `
 <!DOCTYPE html>
